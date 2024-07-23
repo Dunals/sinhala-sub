@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Google</title>
+	<link rel="icon"  href="favicon.ico">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <section class="section-1">
+        <img src="/images/logo.png" class="logo" alt="Subtitle Search">
+        <div class="search-box">
+            <img src="/images/search.svg" class="search-icon" alt="Search">
+            <input type="text" id="searchInput" class="s-input" placeholder="Search for a subtitle...">
+            <button onclick="searchSubtitles()" class="search-button">Search</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+        <div class="pagination" id="pagination"></div>
+    </section>
+
+    <footer>
+        <div class="links">
+            <a href="#">Advertising</a>
+            <a href="#">Business</a>
+            <a href="#">About</a>
+            <a href="#">How Search works</a>
+        </div>
+        <div class="links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Settings</a>
+        </div>
+    </footer>
+
+    <script>
+        let subtitles = [];
+        let currentPage = 1;
+        const resultsPerPage = 4;
+        
+        // Load the JSON data
+        fetch('subtitles.json')
+            .then(response => response.json())
+            .then(data => subtitles = data);
+        
+        function searchSubtitles() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const results = subtitles.filter(subtitle => subtitle.title.toLowerCase().includes(query));
+            currentPage = 1;
+            displayResults(results, currentPage);
+            setupPagination(results);
+        }
+        
+        function displayResults(results, page) {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            
+            const start = (page - 1) * resultsPerPage;
+            const end = start + resultsPerPage;
+            const paginatedResults = results.slice(start, end);
+        
+            paginatedResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `<a href="${result.url}" target="_blank">${result.title}</a>`;
+                searchResults.appendChild(resultItem);
+            });
+        }
+        
+        function setupPagination(results) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+        
+            const pageCount = Math.ceil(results.length / resultsPerPage);
+            for (let i = 1; i <= pageCount; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.onclick = () => {
+                    currentPage = i;
+                    displayResults(results, currentPage);
+                    setupPagination(results);
+                };
+                if (i === currentPage) {
+                    button.classList.add('disabled');
+                }
+                pagination.appendChild(button);
+            }
+        }
+        
+    </script>
+</body>
+</html>
